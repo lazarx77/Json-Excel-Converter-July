@@ -305,38 +305,6 @@ public class JsonToExcelConverter {
         }
     }
 
-    private static List<Map<String, Object>> flattenJsonWithDuplicates(JsonNode node, String parentPath, Map<String, Object> currentData) {
-        List<Map<String, Object>> result = new ArrayList<>();
-
-        if (node.isObject()) {
-            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> field = fields.next();
-                String newPath = parentPath.isEmpty() ? field.getKey() : parentPath + "." + field.getKey();
-
-                if (field.getValue().isArray()) {
-                    for (int i = 0; i < field.getValue().size(); i++) {
-                        JsonNode arrayItem = field.getValue().get(i);
-                        String arrayKey = newPath + "[" + i + "]";
-
-                        Map<String, Object> newData = new LinkedHashMap<>(currentData);
-                        List<Map<String, Object>> nestedResult = flattenJsonWithDuplicates(arrayItem, arrayKey, newData);
-                        result.addAll(nestedResult);
-                    }
-                } else if (field.getValue().isObject()) {
-                    Map<String, Object> newData = new LinkedHashMap<>(currentData);
-                    newData.put(newPath, field.getValue().toString()); // Сохраняем значение как JSON-строку
-                    result.addAll(flattenJsonWithDuplicates(field.getValue(), newPath, newData));
-                } else {
-                    currentData.put(newPath, field.getValue().asText());
-                }
-            }
-        }
-
-        result.add(currentData);
-        return result;
-    }
-
     private static Set<String> collectHeaders(List<Map<String, Object>> data) {
         Set<String> headers = new HashSet<>();
         for (Map<String, Object> row : data) {
